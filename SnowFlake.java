@@ -23,16 +23,16 @@ public class SnowFlake {
     /**
      * 每一部分的最大值
      */
-    private final static long MAX_DATACENTER_NUM = -1L ^ (-1L << DATACENTER_BIT);
-    private final static long MAX_MACHINE_NUM = -1L ^ (-1L << MACHINE_BIT);
-    private final static long MAX_SEQUENCE = -1L ^ (-1L << SEQUENCE_BIT);
+    private final static long MAX_DATACENTER_NUM = -1L ^ (-1L << DATACENTER_BIT); // 31
+    private final static long MAX_MACHINE_NUM = -1L ^ (-1L << MACHINE_BIT);     // 31
+    private final static long MAX_SEQUENCE = -1L ^ (-1L << SEQUENCE_BIT);       // 4095  2 ^12 - 1  每毫秒能够生成的最大数量
 
     /**
      * 每一部分向左的位移
      */
-    private final static long MACHINE_LEFT = SEQUENCE_BIT;
-    private final static long DATACENTER_LEFT = SEQUENCE_BIT + MACHINE_BIT;
-    private final static long TIMESTMP_LEFT = DATACENTER_LEFT + DATACENTER_BIT;
+    private final static long MACHINE_LEFT = SEQUENCE_BIT;  // 12      （机器序列号 占有 5 bit, 左移 编程 从 17-13）
+    private final static long DATACENTER_LEFT = SEQUENCE_BIT + MACHINE_BIT; // 17  数据中心（机房）偏移
+    private final static long TIMESTMP_LEFT = DATACENTER_LEFT + DATACENTER_BIT; // 22   
 
     private long datacenterId;  //数据中心
     private long machineId;     //机器标识
@@ -63,7 +63,7 @@ public class SnowFlake {
 
         if (currStmp == lastStmp) {
             //相同毫秒内，序列号自增
-            sequence = (sequence + 1) & MAX_SEQUENCE;
+            sequence = (sequence + 1) & MAX_SEQUENCE; // 只有 4096 & 4095 == 0; 因此，也就是 在 同一毫秒内 ，产生的 自增 Id 达到最大。 ---- 只能由 12 bit 存储序列号
             //同一毫秒的序列数已经达到最大
             if (sequence == 0L) {
                 currStmp = getNextMill();
